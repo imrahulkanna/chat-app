@@ -3,6 +3,7 @@ const socket = io();
 const sendButton = document.querySelector('#sendButton');
 const input = document.querySelector('#messageInput');
 const messages = document.querySelector('#messages');
+let rem = {}
 
 input.addEventListener('keyup', (e) => {
   if(e.keyCode === 13) {
@@ -11,52 +12,63 @@ input.addEventListener('keyup', (e) => {
   }
 });
 
-// input.addEventListener('keyup', (e) => {
-//   const command = input.value;
-//   switch (command) {
-//     case '/help':
-//       const textMessage = `Available commands:
-// -> /random - Print a random number
-// -> /clear - Clear the chat window`;
-//       alert(textMessage);
-//       input.value=''
-//       break;
-    
-//     case '/clear':
-//       break;
-
-//     case '/random':
-//       break
-
-//     default:
-//       break;
-//   }
-// })
-
 sendButton.addEventListener('click', (e) => {
   e.preventDefault();
   const command = input.value;
-  switch (command) {
-    case "/help":
-      const textMessage = `Available commands:
+  if(command.trim() === '') {
+    alert("enter any message");
+    exit();
+  }
+
+  if(command.includes('/calc')) {
+    const res = eval(command.slice(6))
+    if(res === undefined){
+      alert('give a math eq');
+      exit();
+    }
+    socket.emit("chat message", { message: `Result: ${res}`, sender: "client" });
+  }
+  else if(command.includes('/rem')) {
+    let pairs = command.slice(5);
+    let arr=[];
+    if(pairs) {arr = pairs.split(' ')}
+
+    if(arr.length === 2) {
+      rem={...rem, [arr[0]]:arr[1],}
+    } else if(arr.length === 1) {
+      if(rem[arr[0]])
+      {socket.emit("chat message", { message: rem[arr[0]], sender: "client" });}
+      else {
+        alert('No such key. Enter a value along with the key to remember ')
+      }
+    }
+  }
+  else {
+    switch (command) {
+      case "/help":
+        const textMessage = `Available commands:
   -> /random - Print a random number
-  -> /clear - Clear the chat window`;
-      alert(textMessage);
-      break;
+  -> /clear - Clear the chat window
+  -> /calc mathEq - Calculates the given mathEq
+  -> /rem <name> <val> - Remembers the 'value' against the 'name'
+  -> /rem <name> - Returns the 'value' associated to the 'name'`;
+        alert(textMessage);
+        break;
 
-    case "/clear":
-      messages.innerHTML="";
-      break;
+      case "/clear":
+        messages.innerHTML = "";
+        break;
 
-    case "/random":
-      const num = Math.random();
-      const msge = `Your random number is ${num}`
-      socket.emit("chat message", { message: msge, sender: "server" });
-      break;
+      case "/random":
+        const num = Math.random();
+        const msge = `Your random number is ${num}`;
+        socket.emit("chat message", { message: msge, sender: "server" });
+        break;
 
-    default:
-      socket.emit("chat message", { message: input.value, sender: "client" });
-      break;
+      default:
+        socket.emit("chat message", { message: input.value, sender: "client" });
+        break;
+    }
   }
   input.value = "";
 });
