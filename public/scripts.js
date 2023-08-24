@@ -2,7 +2,7 @@ const socket = io();
 
 const sendButton = document.querySelector('#sendButton');
 const input = document.querySelector('#messageInput');
-const messages = document.querySelector('#messages');
+const messages = document.querySelector('#messages'); 
 let rem = {}
 
 input.addEventListener('keyup', (e) => {
@@ -47,12 +47,24 @@ sendButton.addEventListener('click', (e) => {
     switch (command) {
       case "/help":
         const textMessage = `Available commands:
+  -> /emoji - Description for emoji commands
   -> /random - Print a random number
   -> /clear - Clear the chat window
   -> /calc mathEq - Calculates the given mathEq
   -> /rem <name> <val> - Remembers the 'value' against the 'name'
   -> /rem <name> - Returns the 'value' associated to the 'name'`;
         alert(textMessage);
+        break;
+
+      case "/emoji":
+        const emojmsge = `Emoji commands
+  :lol -> 😂
+  :like -> 💟
+  :hey -> 👋
+  :woah -> 😲
+  :congratulations -> 🎉
+  :react -> ⚛️`;
+        alert(emojmsge);
         break;
 
       case "/clear":
@@ -77,12 +89,12 @@ function replaceTextWithEmojis(text) {
   textArr = text.split(' ');
   for(let i=0; i<textArr.length; i++){
     switch (textArr[i].toLowerCase()) {
-      case 'lol':textArr[i] = "😂";break;
-      case 'like':textArr[i]='💟';break;
-      case 'hey':textArr[i]='👋';break;
-      case 'woah':textArr[i]='😲';break;
-      case 'congratulations':textArr[i] = "🎉";break;
-      case 'react':textArr[i] = "⚛️";break;
+      case ':lol':textArr[i] = "😂";break;
+      case ':like':textArr[i]='💟';break;
+      case ':hey':textArr[i]='👋';break;
+      case ':woah':textArr[i]='😲';break;
+      case ':congratulations':textArr[i] = "🎉";break;
+      case ':react':textArr[i] = "⚛️";break;
       default:break;
     }
   };
@@ -99,4 +111,8 @@ socket.on('chat message', (data) => {
     messageElement.textContent = replaceTextWithEmojis(data.message);
     messages.appendChild(messageElement);
     messages.scrollTop = messages.scrollHeight;
+});
+
+socket.on('userCount', (userCount) => {
+  document.querySelector(".user-count").innerHTML = userCount;
 });
